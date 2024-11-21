@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "FC9113C5-2DFA-4A20-8812-5C0B68D2D449",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:nodetool.xcodeproj",
+      "identifier" : "B6C61B522CEEE2A900403DE5",
+      "name" : "nodetool"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:nodetool.xcodeproj",
+        "identifier" : "B6C61B652CEEE2AB00403DE5",
+        "name" : "nodetoolTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:nodetool.xcodeproj",
+        "identifier" : "B6C61B6F2CEEE2AB00403DE5",
+        "name" : "nodetoolUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
