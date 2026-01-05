@@ -182,74 +182,152 @@ struct MedicationTrackerView: View {
     }
     
     // Analytics view shows insights and patterns
+    // Analytics view shows insights and patterns
     var analyticsView: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Effectiveness Insights
-                SectionTitleView(title: "Effectiveness Insights")
-                
-                Text(medicationTracker.getEffectivenessInsights())
-                    .font(.body)
+            if medicationTracker.medicationIntakes.isEmpty {
+                // Empty state when no data
+                VStack(spacing: 20) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.system(size: 60))
+                        .foregroundColor(.gray.opacity(0.5))
+                        .padding(.top, 60)
+                    
+                    Text("No Data Yet")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    Text("Start logging medication intakes to see effectiveness insights, trends, and analytics")
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 40)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    Button(action: {
+                        showingAddIntakeSheet = true
+                    }) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                            Text("Log Your First Medication")
+                        }
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.top, 10)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
+            } else {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Effectiveness Insights
+                    SectionTitleView(title: "Effectiveness Insights")
+                    
+                    Text(medicationTracker.getEffectivenessInsights())
+                        .font(.body)
+                        .padding()
+                        .background(Color.secondary.opacity(0.1))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                    
+                    // Medication Effectiveness Chart
+                    SectionTitleView(title: "Effectiveness Over Time")
+                    
+                    MedicationEffectivenessChart(medicationIntakes: medicationTracker.medicationIntakes)
+                        .frame(height: 200)
+                        .padding()
+                    
+                    // Study Session Performance
+                    if !medicationTracker.studySessions.isEmpty {
+                        SectionTitleView(title: "Study Performance")
+                        
+                        StudyPerformanceChart(studySessions: medicationTracker.studySessions)
+                            .frame(height: 200)
+                            .padding()
+                    } else {
+                        SectionTitleView(title: "Study Performance")
+                        
+                        VStack(spacing: 12) {
+                            Image(systemName: "book.closed")
+                                .font(.system(size: 40))
+                                .foregroundColor(.gray.opacity(0.5))
+                            
+                            Text("No study sessions yet")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Button(action: {
+                                showingAddSessionSheet = true
+                            }) {
+                                Text("Start First Session")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                        .frame(height: 200)
+                        .frame(maxWidth: .infinity)
+                    }
+                    
+                    // Pattern Analysis
+                    SectionTitleView(title: "Pattern Analysis")
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Best Time to Take Medication")
+                            .font(.headline)
+                        
+                        let bestTimeData = getBestTimeData()
+                        
+                        if bestTimeData.isEmpty {
+                            VStack(spacing: 8) {
+                                Text("Track more medications with ratings to see optimal timing patterns")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 30)
+                        } else {
+                            HStack(alignment: .bottom, spacing: 4) {
+                                ForEach(0..<24) { hour in
+                                    VStack {
+                                        let value = bestTimeData[hour] ?? 0
+                                        let height = min(100.0, Double(value) * 10)
+                                        
+                                        Rectangle()
+                                            .fill(getColorForHour(hour: hour, value: value))
+                                            .frame(height: max(height, 5))
+                                        
+                                        if hour % 3 == 0 {
+                                            Text("\(hour)")
+                                                .font(.system(size: 8))
+                                                .rotationEffect(.degrees(-45))
+                                        }
+                                    }
+                                }
+                            }
+                            .frame(height: 120)
+                            .padding(.vertical)
+                            
+                            Text("Hours of Day (0-23)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     .padding()
                     .background(Color.secondary.opacity(0.1))
                     .cornerRadius(10)
                     .padding(.horizontal)
-                
-                // Medication Effectiveness Chart
-                SectionTitleView(title: "Effectiveness Over Time")
-                
-                MedicationEffectivenessChart(medicationIntakes: medicationTracker.medicationIntakes)
-                    .frame(height: 200)
-                    .padding()
-                
-                // Study Session Performance
-                SectionTitleView(title: "Study Performance")
-                
-                StudyPerformanceChart(studySessions: medicationTracker.studySessions)
-                    .frame(height: 200)
-                    .padding()
-                
-                // Pattern Analysis
-                SectionTitleView(title: "Pattern Analysis")
-                
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Best Time to Take Medication")
-                        .font(.headline)
-                    
-                    let bestTimeData = getBestTimeData()
-                    
-                    HStack(alignment: .bottom, spacing: 4) {
-                        ForEach(0..<24) { hour in
-                            VStack {
-                                let value = bestTimeData[hour] ?? 0
-                                let height = min(100.0, Double(value) * 10)
-                                
-                                Rectangle()
-                                    .fill(getColorForHour(hour: hour, value: value))
-                                    .frame(height: height)
-                                
-                                if hour % 3 == 0 {
-                                    Text("\(hour)")
-                                        .font(.system(size: 8))
-                                        .rotationEffect(.degrees(-45))
-                                }
-                            }
-                        }
-                    }
-                    .frame(height: 120)
-                    .padding(.vertical)
-                    
-                    Text("Hours of Day (0-23)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
-                .padding()
-                .background(Color.secondary.opacity(0.1))
-                .cornerRadius(10)
-                .padding(.horizontal)
+                .padding(.vertical)
             }
-            .padding(.vertical)
         }
+    }
+
     }
     
     // History view shows past medications and sessions
