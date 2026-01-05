@@ -677,7 +677,7 @@ struct StartStudySessionView: View {
     private func saveStudySession() {
         medicationTracker.startStudySession(
             subjectStudied: subjectStudied,
-            medicationID: selectedMedicationID,
+            relatedMedicationIntake: selectedMedicationID,
             notes: notes
         )
         
@@ -825,12 +825,11 @@ struct CompleteStudySessionView: View {
     }
     
     private func saveCompletion() {
-        medicationTracker.completeStudySession(
+        medicationTracker.endStudySession(
             sessionID: sessionID,
-            focusRating: focusRating,
             productivityRating: productivityRating,
-            comprehensionRating: comprehensionRating,
-            notes: notes
+            focusRating: focusRating,
+            additionalNotes: notes
         )
         
         isPresented = false
