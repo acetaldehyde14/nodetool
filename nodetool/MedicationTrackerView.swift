@@ -384,7 +384,6 @@ struct MedicationTrackerView: View {
             return Color.blue
         }
     }
-}
 
 // Supporting views
 struct SectionTitleView: View {
