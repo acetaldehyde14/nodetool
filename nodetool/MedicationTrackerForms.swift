@@ -21,106 +21,155 @@ struct AddMedicationIntakeView: View {
     ]
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Medication Details")) {
-                    HStack {
-                        Text("Ritalin")
-                            .font(.headline)
-                        
-                        Spacer()
-                        
-                        // Dosage picker
-                        Stepper(value: $dosage, in: 5...20, step: 2.5) {
-                            HStack {
-                                Text("Dosage:")
-                                Text("\(dosage, specifier: "%.1f") mg")
-                                    .fontWeight(.medium)
-                            }
-                        }
-                    }
-                    
-                    DatePicker("Time Taken", selection: .constant(Date()), displayedComponents: [.date, .hourAndMinute])
-                }
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Log Medication")
+                    .font(.title2)
+                    .fontWeight(.bold)
                 
-                Section(header: Text("Conditions")) {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach(conditionOptions, id: \.self) { condition in
-                                Button(action: {
-                                    toggleCondition(condition)
-                                }) {
-                                    Text(condition)
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 5)
-                                        .background(conditions.contains(condition) ? Color.blue : Color.gray.opacity(0.2))
-                                        .foregroundColor(conditions.contains(condition) ? .white : .primary)
-                                        .cornerRadius(15)
-                                }
-                            }
-                        }
-                        .padding(.vertical, 5)
-                    }
-                }
+                Spacer()
                 
-                Section(header: Text("Additional Factors")) {
-                    HStack {
-                        Text("Sleep Last Night")
-                        Spacer()
-                        Text("\(sleepHours, specifier: "%.1f") hours")
-                    }
-                    Slider(value: $sleepHours, in: 0...12, step: 0.5)
-                    
-                    HStack {
-                        Text("Current Stress Level")
-                        Spacer()
-                        ForEach(1...5, id: \.self) { level in
-                            Image(systemName: level <= stressLevel ? "star.fill" : "star")
-                                .foregroundColor(level <= stressLevel ? .orange : .gray)
-                                .onTapGesture {
-                                    stressLevel = level
-                                }
-                        }
-                    }
-                    
-                    HStack {
-                        Text("Hydration Level")
-                        Spacer()
-                        ForEach(1...5, id: \.self) { level in
-                            Image(systemName: level <= hydrationLevel ? "drop.fill" : "drop")
-                                .foregroundColor(level <= hydrationLevel ? .blue : .gray)
-                                .onTapGesture {
-                                    hydrationLevel = level
-                                }
-                        }
-                    }
-                    
-                    Toggle("Exercised Today", isOn: $exercisedBefore)
-                    Toggle("Taken with Food", isOn: $foodIntakeBefore)
+                Button("Cancel") {
+                    isPresented = false
                 }
-                
-                Section(header: Text("Notes")) {
-                    TextEditor(text: $notes)
-                        .frame(minHeight: 100)
-                }
-                
-                Section {
-                    Button(action: saveMedication) {
-                        Text("Log Medication")
-                            .fontWeight(.bold)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                }
+                .keyboardShortcut(.cancelAction)
             }
-            .navigationTitle("Log Medication")
-            .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Button("Cancel") {
-                        isPresented = false
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            
+            // Content
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Medication Details
+                    GroupBox(label: Text("Medication Details").font(.headline)) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Ritalin")
+                                    .font(.headline)
+                                
+                                Spacer()
+                                
+                                Stepper(value: $dosage, in: 5...20, step: 2.5) {
+                                    HStack {
+                                        Text("Dosage:")
+                                        Text("\(dosage, specifier: "%.1f") mg")
+                                            .fontWeight(.medium)
+                                    }
+                                }
+                            }
+                            
+                            DatePicker("Time Taken", selection: .constant(Date()), displayedComponents: [.date, .hourAndMinute])
+                        }
+                        .padding(8)
                     }
+                    
+                    // Conditions
+                    GroupBox(label: Text("Conditions").font(.headline)) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(conditionOptions, id: \.self) { condition in
+                                    Button(action: {
+                                        toggleCondition(condition)
+                                    }) {
+                                        Text(condition)
+                                            .font(.system(size: 12))
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 5)
+                                            .background(conditions.contains(condition) ? Color.blue : Color.gray.opacity(0.2))
+                                            .foregroundColor(conditions.contains(condition) ? .white : .primary)
+                                            .cornerRadius(15)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.vertical, 8)
+                        }
+                        .padding(8)
+                    }
+                    
+                    // Additional Factors
+                    GroupBox(label: Text("Additional Factors").font(.headline)) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text("Sleep Last Night")
+                                    Spacer()
+                                    Text("\(sleepHours, specifier: "%.1f") hours")
+                                        .foregroundColor(.secondary)
+                                }
+                                Slider(value: $sleepHours, in: 0...12, step: 0.5)
+                            }
+                            
+                            Divider()
+                            
+                            HStack {
+                                Text("Current Stress Level")
+                                Spacer()
+                                ForEach(1...5, id: \.self) { level in
+                                    Image(systemName: level <= stressLevel ? "star.fill" : "star")
+                                        .foregroundColor(level <= stressLevel ? .orange : .gray)
+                                        .onTapGesture {
+                                            stressLevel = level
+                                        }
+                                }
+                            }
+                            
+                            Divider()
+                            
+                            HStack {
+                                Text("Hydration Level")
+                                Spacer()
+                                ForEach(1...5, id: \.self) { level in
+                                    Image(systemName: level <= hydrationLevel ? "drop.fill" : "drop")
+                                        .foregroundColor(level <= hydrationLevel ? .blue : .gray)
+                                        .onTapGesture {
+                                            hydrationLevel = level
+                                        }
+                                }
+                            }
+                            
+                            Divider()
+                            
+                            Toggle("Exercised Today", isOn: $exercisedBefore)
+                            
+                            Divider()
+                            
+                            Toggle("Taken with Food", isOn: $foodIntakeBefore)
+                        }
+                        .padding(8)
+                    }
+                    
+                    // Notes
+                    GroupBox(label: Text("Notes").font(.headline)) {
+                        TextEditor(text: $notes)
+                            .frame(height: 80)
+                            .font(.body)
+                            .padding(4)
+                    }
+                    
+                    // Save Button
+                    HStack {
+                        Spacer()
+                        Button(action: saveMedication) {
+                            Text("Log Medication")
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .frame(width: 150)
+                                .padding(.vertical, 8)
+                                .background(Color.blue)
+                                .cornerRadius(8)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .keyboardShortcut(.defaultAction)
+                        Spacer()
+                    }
+                    .padding(.top, 10)
                 }
+                .padding()
             }
         }
+        .frame(width: 500, height: 700)
     }
     
     private func toggleCondition(_ condition: String) {
@@ -152,153 +201,311 @@ struct RateMedicationView: View {
     let intakeID: UUID
     @Binding var isPresented: Bool
     
-    @State private var effectRating: Int = 7
-    @State private var durationMinutes: Double = 240
-    @State private var currentEffectStrength: Int = 7
-    @State private var timeOffset: Double = 0
+    @State private var effectRating: Int = 5
+    @State private var durationMinutes: Double = 180
     @State private var effectNotes: String = ""
-    @State private var showingAddPoint = false
+    @State private var showingAddPoint: Bool = false
     
-    // Get the intake we're rating
-    private var intake: MedicationIntake? {
+    var intake: MedicationIntake? {
         medicationTracker.medicationIntakes.first { $0.id == intakeID }
     }
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Overall Rating")) {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Rate Medication Effect")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Button("Cancel") {
+                    isPresented = false
+                }
+                .keyboardShortcut(.cancelAction)
+            }
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            
+            // Content
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
                     if let intake = intake {
-                        HStack {
-                            Text("Ritalin \(String(format: "%.1f", intake.dosage))mg")
-                                .font(.headline)
-                            
-                            Spacer()
-                            
-                            Text("Taken at \(formatTime(intake.timestamp))")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("Effectiveness (1-10)")
-                            .font(.subheadline)
-                        
-                        HStack {
-                            Text("Low")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            
-                            Slider(value: Binding(
-                                get: { Double(effectRating) },
-                                set: { effectRating = Int($0) }
-                            ), in: 1...10, step: 1)
-                            
-                            Text("High")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        Text("\(effectRating) / 10")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, 5)
-                    }
-                }
-                
-                Section(header: Text("Duration")) {
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text("Total Duration")
-                                .font(.subheadline)
-                            
-                            Spacer()
-                            
-                            Text("\(formatDuration(Int(durationMinutes)))")
-                                .font(.subheadline)
-                        }
-                        
-                        Slider(value: $durationMinutes, in: 30...480, step: 15)
-                    }
-                }
-                
-                Section(header: Text("Effectiveness Timeline")) {
-                    if let pattern = intake?.effectPattern, !pattern.isEmpty {
-                        ForEach(pattern.sorted(by: { $0.timeOffset < $1.timeOffset })) { point in
-                            HStack {
-                                Label("\(formatDuration(point.timeOffset))", systemImage: "clock")
+                        // Medication Info
+                        GroupBox {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text("Ritalin \(String(format: "%.1f", intake.dosage))mg")
+                                        .font(.headline)
+                                    
+                                    Spacer()
+                                    
+                                    Text("Taken at \(formatTime(intake.timestamp))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                                 
-                                Spacer()
+                                if !intake.conditions.isEmpty {
+                                    HStack {
+                                        ForEach(intake.conditions, id: \.self) { condition in
+                                            Text(condition)
+                                                .font(.caption)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 3)
+                                                .background(Color.blue.opacity(0.1))
+                                                .cornerRadius(8)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(8)
+                        }
+                        
+                        // Effect Rating
+                        GroupBox(label: Text("Overall Effectiveness").font(.headline)) {
+                            VStack(spacing: 12) {
+                                HStack {
+                                    Text("Poor")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Spacer()
+                                    
+                                    ForEach(1...10, id: \.self) { rating in
+                                        Image(systemName: rating <= effectRating ? "star.fill" : "star")
+                                            .foregroundColor(rating <= effectRating ? .yellow : .gray)
+                                            .font(.system(size: 16))
+                                            .onTapGesture {
+                                                effectRating = rating
+                                            }
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text("Excellent")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                                 
-                                Text("\(point.effectStrength)/10")
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 2)
-                                    .background(getColorForStrength(point.effectStrength).opacity(0.2))
-                                    .cornerRadius(8)
+                                Text("\(effectRating) / 10")
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                            }
+                            .padding(8)
+                        }
+                        
+                        // Duration
+                        GroupBox(label: Text("Duration of Effect").font(.headline)) {
+                            VStack(spacing: 12) {
+                                HStack {
+                                    Text("Duration:")
+                                    Spacer()
+                                    Text(formatDuration(Int(durationMinutes)))
+                                        .fontWeight(.medium)
+                                }
+                                
+                                Slider(value: $durationMinutes, in: 30...480, step: 30)
+                                
+                                HStack {
+                                    Text("30 min")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Spacer()
+                                    
+                                    Text("8 hours")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .padding(8)
+                        }
+                        
+                        // Effect Pattern
+                        if let pattern = intake.effectPattern, !pattern.isEmpty {
+                            GroupBox(label: Text("Effect Timeline").font(.headline)) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    ForEach(pattern.sorted(by: { $0.timeOffset < $1.timeOffset }), id: \.timeOffset) { point in
+                                        HStack {
+                                            Text("\(point.timeOffset) min")
+                                                .frame(width: 70, alignment: .leading)
+                                            
+                                            HStack(spacing: 2) {
+                                                ForEach(0..<10) { i in
+                                                    Rectangle()
+                                                        .fill(i < point.effectStrength ? getColorForStrength(point.effectStrength) : Color.gray.opacity(0.2))
+                                                        .frame(width: 15, height: 8)
+                                                }
+                                            }
+                                            
+                                            Text("\(point.effectStrength)/10")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        .font(.caption)
+                                    }
+                                    
+                                    Button(action: {
+                                        showingAddPoint = true
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "plus.circle.fill")
+                                            Text("Add Effect Point")
+                                        }
+                                        .font(.caption)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                    .padding(.top, 4)
+                                }
+                                .padding(8)
                             }
                         }
-                    }
-                    
-                    Button(action: { showingAddPoint = true }) {
-                        Label("Add Effect Point", systemImage: "plus.circle")
+                        
+                        // Notes
+                        GroupBox(label: Text("Additional Notes").font(.headline)) {
+                            TextEditor(text: $effectNotes)
+                                .frame(height: 80)
+                                .font(.body)
+                                .padding(4)
+                        }
+                        
+                        // Save Button
+                        HStack {
+                            Spacer()
+                            Button(action: saveRating) {
+                                Text("Save Rating")
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .frame(width: 150)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue)
+                                    .cornerRadius(8)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .keyboardShortcut(.defaultAction)
+                            Spacer()
+                        }
+                        .padding(.top, 10)
                     }
                 }
-                
-                Section {
-                    Button(action: saveRating) {
-                        Text("Save Rating")
-                            .fontWeight(.bold)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                }
+                .padding()
             }
-            .navigationTitle("Rate Medication")
-            .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Button("Cancel") {
-                        isPresented = false
-                    }
-                }
-            }
-            .sheet(isPresented: $showingAddPoint) {
-                addEffectPointView
-            }
+        }
+        .frame(width: 500, height: 700)
+        .sheet(isPresented: $showingAddPoint) {
+            AddEffectPointView(
+                medicationTracker: medicationTracker,
+                intakeID: intakeID,
+                showingAddPoint: $showingAddPoint
+            )
         }
     }
     
-    var addEffectPointView: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Time Since Taking Medication")) {
-                    VStack(alignment: .leading) {
+    private func saveRating() {
+        medicationTracker.completeMedicationIntake(
+            intakeID: intakeID,
+            effectRating: effectRating,
+            durationMinutes: Int(durationMinutes)
+        )
+        
+        isPresented = false
+    }
+    
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: date)
+    }
+    
+    private func formatDuration(_ minutes: Int) -> String {
+        let hours = minutes / 60
+        let mins = minutes % 60
+        if hours > 0 {
+            return "\(hours)h \(mins)m"
+        } else {
+            return "\(mins)m"
+        }
+    }
+    
+    private func getColorForStrength(_ strength: Int) -> Color {
+        switch strength {
+        case 1...3: return .red
+        case 4...6: return .orange
+        case 7...8: return .yellow
+        case 9...10: return .green
+        default: return .gray
+        }
+    }
+}
+
+struct AddEffectPointView: View {
+    @ObservedObject var medicationTracker: MedicationTrackerManager
+    let intakeID: UUID
+    @Binding var showingAddPoint: Bool
+    
+    @State private var timeOffset: Double = 30
+    @State private var currentEffectStrength: Int = 5
+    @State private var effectNotes: String = ""
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Add Effect Point")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Button("Cancel") {
+                    showingAddPoint = false
+                }
+                .keyboardShortcut(.cancelAction)
+            }
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            
+            // Content
+            VStack(alignment: .leading, spacing: 20) {
+                GroupBox(label: Text("Time After Taking").font(.headline)) {
+                    VStack(spacing: 12) {
                         HStack {
-                            Text("Time Offset")
-                                .font(.subheadline)
-                            
+                            Text("Time:")
                             Spacer()
-                            
-                            Text("\(formatDuration(Int(timeOffset)))")
-                                .font(.subheadline)
+                            Text("\(Int(timeOffset)) minutes")
+                                .fontWeight(.medium)
                         }
                         
                         Slider(value: $timeOffset, in: 0...480, step: 15)
+                        
+                        HStack {
+                            Text("Now")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            Text("8 hours")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
+                    .padding(8)
                 }
                 
-                Section(header: Text("Effectiveness at This Time")) {
-                    VStack(alignment: .leading) {
-                        Text("Effectiveness (1-10)")
-                            .font(.subheadline)
-                        
+                GroupBox(label: Text("Effect Strength").font(.headline)) {
+                    VStack(spacing: 12) {
                         HStack {
                             Text("Low")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
-                            Slider(value: Binding(
-                                get: { Double(currentEffectStrength) },
-                                set: { currentEffectStrength = Int($0) }
-                            ), in: 1...10, step: 1)
+                            Slider(
+                                value: Binding(
+                                    get: { Double(currentEffectStrength) },
+                                    set: { currentEffectStrength = Int($0) }
+                                ), in: 1...10, step: 1)
                             
                             Text("High")
                                 .font(.caption)
@@ -306,33 +513,40 @@ struct RateMedicationView: View {
                         }
                         
                         Text("\(currentEffectStrength) / 10")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, 5)
+                            .font(.title3)
+                            .fontWeight(.semibold)
                     }
+                    .padding(8)
                 }
                 
-                Section(header: Text("Notes")) {
+                GroupBox(label: Text("Notes").font(.headline)) {
                     TextEditor(text: $effectNotes)
-                        .frame(minHeight: 100)
+                        .frame(height: 60)
+                        .font(.body)
+                        .padding(4)
                 }
                 
-                Section {
+                Spacer()
+                
+                HStack {
+                    Spacer()
                     Button(action: addEffectPoint) {
                         Text("Add Point")
                             .fontWeight(.bold)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                            .foregroundColor(.white)
+                            .frame(width: 120)
+                            .padding(.vertical, 8)
+                            .background(Color.blue)
+                            .cornerRadius(8)
                     }
+                    .buttonStyle(PlainButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+                    Spacer()
                 }
             }
-            .navigationTitle("Add Effect Point")
-            .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Button("Cancel") {
-                        showingAddPoint = false
-                    }
-                }
-            }
+            .padding()
         }
+        .frame(width: 400, height: 450)
     }
     
     private func addEffectPoint() {
@@ -345,364 +559,296 @@ struct RateMedicationView: View {
         
         showingAddPoint = false
     }
-    
-    private func saveRating() {medicationTracker.completeMedicationIntake(
-        intakeID: intakeID,
-        effectRating: effectRating,
-        durationMinutes: Int(durationMinutes)
-    )
-    
-    isPresented = false
-}
-
-private func formatTime(_ date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm a"
-    return formatter.string(from: date)
-}
-
-private func formatDuration(_ minutes: Int) -> String {
-    let hours = minutes / 60
-    let mins = minutes % 60
-    if hours > 0 {
-        return "\(hours)h \(mins)m"
-    } else {
-        return "\(mins)m"
-    }
-}
-
-private func getColorForStrength(_ strength: Int) -> Color {
-    switch strength {
-    case 1...3: return .red
-    case 4...6: return .orange
-    case 7...8: return .yellow
-    case 9...10: return .green
-    default: return .gray
-    }
-}
 }
 
 struct StartStudySessionView: View {
-@ObservedObject var medicationTracker: MedicationTrackerManager
-@Binding var isPresented: Bool
-
-@State private var subjectStudied: String = ""
-@State private var notes: String = ""
-@State private var selectedMedicationID: UUID?
-
-// Get today's medication intakes
-private var todayIntakes: [MedicationIntake] {
-    medicationTracker.medicationIntakes
-        .filter { Calendar.current.isDateInToday($0.timestamp) }
-        .sorted { $0.timestamp > $1.timestamp }
+    @ObservedObject var medicationTracker: MedicationTrackerManager
+    @Binding var isPresented: Bool
+    
+    @State private var subjectStudied: String = ""
+    @State private var notes: String = ""
+    @State private var selectedMedicationID: UUID?
+    
+    // Get today's medication intakes
+    private var todayIntakes: [MedicationIntake] {
+        medicationTracker.medicationIntakes
+            .filter { Calendar.current.isDateInToday($0.timestamp) }
+            .sorted { $0.timestamp > $1.timestamp }
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Start Study Session")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Button("Cancel") {
+                    isPresented = false
+                }
+                .keyboardShortcut(.cancelAction)
+            }
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            
+            // Content
+            VStack(alignment: .leading, spacing: 20) {
+                GroupBox(label: Text("Study Details").font(.headline)) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        TextField("Subject/Topic", text: $subjectStudied)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        DatePicker("Start Time", selection: .constant(Date()), displayedComponents: [.date, .hourAndMinute])
+                    }
+                    .padding(8)
+                }
+                
+                GroupBox(label: Text("Related Medication").font(.headline)) {
+                    if todayIntakes.isEmpty {
+                        Text("No medications taken today")
+                            .foregroundColor(.secondary)
+                            .padding(8)
+                    } else {
+                        VStack(spacing: 8) {
+                            ForEach(todayIntakes) { intake in
+                                Button(action: {
+                                    selectedMedicationID = intake.id
+                                }) {
+                                    HStack {
+                                        Text("Ritalin \(String(format: "%.1f", intake.dosage))mg")
+                                        Text("(\(formatTime(intake.timestamp)))")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        
+                                        Spacer()
+                                        
+                                        if selectedMedicationID == intake.id {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundColor(.blue)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding(8)
+                                    .background(selectedMedicationID == intake.id ? Color.blue.opacity(0.1) : Color.clear)
+                                    .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                        .padding(8)
+                    }
+                }
+                
+                GroupBox(label: Text("Notes").font(.headline)) {
+                    TextEditor(text: $notes)
+                        .frame(height: 80)
+                        .font(.body)
+                        .padding(4)
+                }
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button(action: saveStudySession) {
+                        Text("Start Session")
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(width: 150)
+                            .padding(.vertical, 8)
+                            .background(Color.blue)
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+                    Spacer()
+                }
+            }
+            .padding()
+        }
+        .frame(width: 450, height: 500)
+    }
+    
+    private func saveStudySession() {
+        medicationTracker.startStudySession(
+            subjectStudied: subjectStudied,
+            medicationID: selectedMedicationID,
+            notes: notes
+        )
+        
+        isPresented = false
+    }
+    
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: date)
+    }
 }
 
-var body: some View {
-    NavigationView {
-        Form {
-            Section(header: Text("Study Details")) {
-                TextField("Subject/Topic", text: $subjectStudied)
+struct CompleteStudySessionView: View {
+    @ObservedObject var medicationTracker: MedicationTrackerManager
+    let sessionID: UUID
+    @Binding var isPresented: Bool
+    
+    @State private var focusRating: Int = 5
+    @State private var productivityRating: Int = 5
+    @State private var comprehensionRating: Int = 5
+    @State private var notes: String = ""
+    
+    var session: StudySession? {
+        medicationTracker.studySessions.first { $0.id == sessionID }
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Complete Study Session")
+                    .font(.title2)
+                    .fontWeight(.bold)
                 
-                DatePicker("Start Time", selection: .constant(Date()), displayedComponents: [.date, .hourAndMinute])
+                Spacer()
+                
+                Button("Cancel") {
+                    isPresented = false
+                }
+                .keyboardShortcut(.cancelAction)
             }
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
             
-            Section(header: Text("Related Medication")) {
-                if todayIntakes.isEmpty {
-                    Text("No medications taken today")
-                        .foregroundColor(.secondary)
-                } else {
-                    ForEach(todayIntakes) { intake in
-                        Button(action: {
-                            selectedMedicationID = intake.id
-                        }) {
-                            HStack {
-                                Text("Ritalin \(String(format: "%.1f", intake.dosage))mg")
-                                Text("(\(formatTime(intake.timestamp)))")
+            // Content
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    if let session = session {
+                        GroupBox {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(session.subjectStudied)
+                                    .font(.headline)
+                                
+                                Text("Started: \(formatTime(session.startTime))")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 
-                                Spacer()
-                                
-                                if selectedMedicationID == intake.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
+                                Text("Duration: \(formatDuration(Int(Date().timeIntervalSince(session.startTime) / 60)))")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
+                            .padding(8)
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        
+                        GroupBox(label: Text("Focus Level").font(.headline)) {
+                            VStack(spacing: 8) {
+                                HStack {
+                                    ForEach(1...10, id: \.self) { rating in
+                                        Image(systemName: rating <= focusRating ? "star.fill" : "star")
+                                            .foregroundColor(rating <= focusRating ? .yellow : .gray)
+                                            .onTapGesture {
+                                                focusRating = rating
+                                            }
+                                    }
+                                }
+                                Text("\(focusRating) / 10")
+                                    .font(.caption)
+                            }
+                            .padding(8)
+                        }
+                        
+                        GroupBox(label: Text("Productivity").font(.headline)) {
+                            VStack(spacing: 8) {
+                                HStack {
+                                    ForEach(1...10, id: \.self) { rating in
+                                        Image(systemName: rating <= productivityRating ? "star.fill" : "star")
+                                            .foregroundColor(rating <= productivityRating ? .yellow : .gray)
+                                            .onTapGesture {
+                                                productivityRating = rating
+                                            }
+                                    }
+                                }
+                                Text("\(productivityRating) / 10")
+                                    .font(.caption)
+                            }
+                            .padding(8)
+                        }
+                        
+                        GroupBox(label: Text("Comprehension").font(.headline)) {
+                            VStack(spacing: 8) {
+                                HStack {
+                                    ForEach(1...10, id: \.self) { rating in
+                                        Image(systemName: rating <= comprehensionRating ? "star.fill" : "star")
+                                            .foregroundColor(rating <= comprehensionRating ? .yellow : .gray)
+                                            .onTapGesture {
+                                                comprehensionRating = rating
+                                            }
+                                    }
+                                }
+                                Text("\(comprehensionRating) / 10")
+                                    .font(.caption)
+                            }
+                            .padding(8)
+                        }
+                        
+                        GroupBox(label: Text("Notes").font(.headline)) {
+                            TextEditor(text: $notes)
+                                .frame(height: 80)
+                                .font(.body)
+                                .padding(4)
+                        }
+                        
+                        HStack {
+                            Spacer()
+                            Button(action: saveCompletion) {
+                                Text("Complete Session")
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .frame(width: 150)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue)
+                                    .cornerRadius(8)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .keyboardShortcut(.defaultAction)
+                            Spacer()
+                        }
                     }
                 }
-            }
-            
-            Section(header: Text("Notes")) {
-                TextEditor(text: $notes)
-                    .frame(minHeight: 100)
-            }
-            
-            Section {
-                Button(action: saveStudySession) {
-                    Text("Start Session")
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
+                .padding()
             }
         }
-        .navigationTitle("Start Study Session")
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button("Cancel") {
-                    isPresented = false
-                }
-            }
+        .frame(width: 450, height: 550)
+    }
+    
+    private func saveCompletion() {
+        medicationTracker.completeStudySession(
+            sessionID: sessionID,
+            focusRating: focusRating,
+            productivityRating: productivityRating,
+            comprehensionRating: comprehensionRating,
+            notes: notes
+        )
+        
+        isPresented = false
+    }
+    
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: date)
+    }
+    
+    private func formatDuration(_ minutes: Int) -> String {
+        let hours = minutes / 60
+        let mins = minutes % 60
+        if hours > 0 {
+            return "\(hours)h \(mins)m"
+        } else {
+            return "\(mins)m"
         }
     }
-}
-
-private func saveStudySession() {
-    guard !subjectStudied.isEmpty else { return }
-    
-    medicationTracker.startStudySession(
-        relatedMedicationIntake: selectedMedicationID,
-        subjectStudied: subjectStudied,
-        notes: notes
-    )
-    
-    isPresented = false
-}
-
-private func formatTime(_ date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm a"
-    return formatter.string(from: date)
-}
-}
-
-struct EndStudySessionView: View {
-@ObservedObject var medicationTracker: MedicationTrackerManager
-@Binding var isPresented: Bool
-let sessionID: UUID
-
-@State private var productivityRating: Int = 7
-@State private var focusRating: Int = 7
-@State private var additionalNotes: String = ""
-
-var body: some View {
-    NavigationView {
-        Form {
-            Section(header: Text("Rate Your Session")) {
-                VStack(alignment: .leading) {
-                    Text("Productivity (1-10)")
-                        .font(.subheadline)
-                    
-                    HStack {
-                        Text("Poor")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Slider(value: Binding(
-                            get: { Double(productivityRating) },
-                            set: { productivityRating = Int($0) }
-                        ), in: 1...10, step: 1)
-                        
-                        Text("Excellent")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Text("\(productivityRating) / 10")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 5)
-                }
-                
-                VStack(alignment: .leading) {
-                    Text("Focus (1-10)")
-                        .font(.subheadline)
-                    
-                    HStack {
-                        Text("Distracted")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Slider(value: Binding(
-                            get: { Double(focusRating) },
-                            set: { focusRating = Int($0) }
-                        ), in: 1...10, step: 1)
-                        
-                        Text("Focused")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Text("\(focusRating) / 10")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 5)
-                }
-            }
-            
-            Section(header: Text("Additional Notes")) {
-                TextEditor(text: $additionalNotes)
-                    .frame(minHeight: 100)
-            }
-            
-            Section {
-                Button(action: endSession) {
-                    Text("End Session")
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-            }
-        }
-        .navigationTitle("End Study Session")
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button("Cancel") {
-                    isPresented = false
-                }
-            }
-        }
-    }
-}
-
-private func endSession() {
-    medicationTracker.endStudySession(
-        sessionID: sessionID,
-        productivityRating: productivityRating,
-        focusRating: focusRating,
-        additionalNotes: additionalNotes
-    )
-    
-    isPresented = false
-}
-}
-
-struct AddStudyBreakView: View {
-@ObservedObject var medicationTracker: MedicationTrackerManager
-@Binding var isPresented: Bool
-let sessionID: UUID
-
-@State private var duration: Double = 5
-@State private var breakType: String = "Rest"
-@State private var notes: String = ""
-
-private let breakTypes = ["Rest", "Walk", "Snack", "Social Media", "Exercise", "Meditation"]
-
-var body: some View {
-    NavigationView {
-        Form {
-            Section(header: Text("Break Details")) {
-                Picker("Break Type", selection: $breakType) {
-                    ForEach(breakTypes, id: \.self) { type in
-                        Text(type).tag(type)
-                    }
-                }
-                
-                HStack {
-                    Text("Duration")
-                    Spacer()
-                    Text("\(Int(duration)) minutes")
-                }
-                
-                Slider(value: $duration, in: 1...30, step: 1)
-            }
-            
-            Section(header: Text("Notes")) {
-                TextEditor(text: $notes)
-                    .frame(minHeight: 50)
-            }
-            
-            Section {
-                Button(action: addBreak) {
-                    Text("Start Break")
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-            }
-        }
-        .navigationTitle("Take a Break")
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button("Cancel") {
-                    isPresented = false
-                }
-            }
-        }
-    }
-}
-
-private func addBreak() {
-    medicationTracker.recordStudyBreak(
-        sessionID: sessionID,
-        durationMinutes: Int(duration),
-        breakType: breakType
-    )
-    
-    isPresented = false
-}
-}
-
-struct RateBreakView: View {
-@ObservedObject var medicationTracker: MedicationTrackerManager
-@Binding var isPresented: Bool
-let sessionID: UUID
-let breakID: UUID
-
-@State private var effectivenessRating: Int = 7
-
-var body: some View {
-    NavigationView {
-        Form {
-            Section(header: Text("Rate Break Effectiveness")) {
-                VStack(alignment: .leading) {
-                    Text("How refreshed do you feel? (1-10)")
-                        .font(.subheadline)
-                    
-                    HStack {
-                        Text("Not at all")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Slider(value: Binding(
-                            get: { Double(effectivenessRating) },
-                            set: { effectivenessRating = Int($0) }
-                        ), in: 1...10, step: 1)
-                        
-                        Text("Very")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Text("\(effectivenessRating) / 10")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 5)
-                }
-            }
-            
-            Section {
-                Button(action: rateBreak) {
-                    Text("Save Rating")
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-            }
-        }
-        .navigationTitle("Rate Break")
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button("Cancel") {
-                    isPresented = false
-                }
-            }
-        }
-    }
-}
-
-private func rateBreak() {
-    medicationTracker.rateBreakEffectiveness(
-        sessionID: sessionID,
-        breakID: breakID,
-        effectivenessRating: effectivenessRating
-    )
-    
-    isPresented = false
-}
 }
